@@ -25,8 +25,6 @@ const App: React.FC = () => {
   useEffect(() => {
     // Subscribe to authentication state changes
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      console.log("Auth state changed!", currentUser);
-
       setUser(currentUser);
 
       if (currentUser) {
@@ -43,20 +41,33 @@ const App: React.FC = () => {
         setCardNumberRefExists(null);
       }
     });
-
     // Clean up the listener on component unmount
     return () => unsubscribe();
   }, [auth, db]);
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<NavigateBasedOnAuth user={user} cardNumberRefExists={cardNumberRefExists} />} />
-        <Route path="/login" element={<LoginSignup/>}/>
-        <Route path="/dashboard" element={<Dashboard transactions={[{ timestamp: "21" }]} />} />
-        <Route path="/cardform" element={<CardForm onCardAdded={handleCardAdded} />} />
+        <Route
+          path="/"
+          element={
+            <NavigateBasedOnAuth
+              user={user}
+              cardNumberRefExists={cardNumberRefExists}
+            />
+          }
+        />
+        <Route path="/login" element={<LoginSignup />} />
+        <Route
+          path="/dashboard"
+          element={<Dashboard transactions={[{ timestamp: "21" }]} />}
+        />
+        <Route
+          path="/cardform"
+          element={<CardForm onCardAdded={handleCardAdded} />}
+        />
       </Routes>
     </Router>
-);
+  );
 };
 
 const NavigateBasedOnAuth: React.FC<{
@@ -68,6 +79,5 @@ const NavigateBasedOnAuth: React.FC<{
   if (cardNumberRefExists === false) return <Navigate to="/cardform" replace />;
   return <div>Loading...</div>;
 };
-
 
 export default App;
