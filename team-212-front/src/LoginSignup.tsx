@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { Button, TextField, Paper, Typography, Container, Divider } from '@mui/material';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import auth from './auth';
+import { useNavigate } from 'react-router-dom';
+
 
 const LoginSignup: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [isLoginMode, setIsLoginMode] = useState<boolean>(true);
+  const navigate = useNavigate();
 
   const handleAuth = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,8 +21,10 @@ const LoginSignup: React.FC = () => {
         await createUserWithEmailAndPassword(auth, email, password);
         console.log("Signed up successfully");
       }
+      navigate('/');
+      
     } catch (error : unknown) {
-      console.error("Unknown error occurred with Firebase authentication.");
+      console.error("Unknown error occurred with Firebase authentication: ", error);
     }
   };
 
@@ -54,7 +59,7 @@ const LoginSignup: React.FC = () => {
             color="primary"
             style={{ marginTop: '10px' }}
           >
-            {isLoginMode ? 'Login' : 'Sign Up'}
+            {isLoginMode ? 'Login' : 'Register'}
           </Button>
         </form>
         <Divider style={{ margin: '20px 0' }} />
@@ -64,7 +69,7 @@ const LoginSignup: React.FC = () => {
           color="secondary"
           onClick={() => setIsLoginMode((prevMode) => !prevMode)}
         >
-          Switch to {isLoginMode ? 'Sign Up' : 'Login'}
+          {isLoginMode ? 'Create an account' : 'Already have an account?'}
         </Button>
       </Paper>
     </Container>

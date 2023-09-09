@@ -1,21 +1,28 @@
 import React, { useState } from "react";
 import { Button, TextField, Paper, Typography, Container } from "@mui/material";
-import { getDatabase, ref, set } from "firebase/database";
+import { getDatabase, ref, push } from "firebase/database";
 import auth from "./auth";
 
-const CardForm: React.FC = () => {
+interface CardFormProps {
+  onCardAdded: () => void;
+}
+const CardForm: React.FC<CardFormProps> = ({ onCardAdded }) => {
   const [cardNumber, setCardNumber] = useState<string>("");
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const db = getDatabase();
-      set(ref(db, "users/" + auth.currentUser?.providerId), {
-        cardNumber: cardNumber,
-      });
+      const cardNumbersRef = ref(
+        db,
+        "users/" + auth.currentUser?.uid + "/cardNumbers"
+      );
+      await push(cardNumbersRef, cardNumber); // Push cardNumber to the array
       console.log("Card number added successfully");
       setCardNumber(""); // Clear the input
-    } catch (error) {
-      console.error("Error: ", error.message);
+      onCardAdded(); // Notify the App component that the card was added
+    } catch (error : unknown) {
+      console.error("Error: ", error);
     }
   };
 
