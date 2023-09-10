@@ -25,9 +25,42 @@ interface TransactionLogProps {
   transactions: Transaction[];
 }
 
-const Dashboard: React.FC<TransactionLogProps> = ({ transactions }) => {
+const Dashboard: React.FC<TransactionLogProps> = () => {
   const [cards, setCards] = useState<{ id: string; cardNumber: string }[]>([]);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
   const [isCardFormOpen, setIsCardFormOpen] = useState(false);
+
+  const navigate = useNavigate();
+
+  const fetchTransactionsForCard = async (cardNumber: string) => {
+    try {
+      const response = await fetch(
+        "https://us-east1-stalwart-realm-339201.cloudfunctions.net/get_transactions-1",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ cardnumber: cardNumber }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const data = await response.json();
+      console.log(data);
+
+      if (data.transactions) {
+        setAllTransactions((prev) => [...prev, ...data.transactions]);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  };
+
   const fetchCards = async () => {
     const db = getDatabase();
     const cardNumbersRef = ref(
@@ -43,21 +76,19 @@ const Dashboard: React.FC<TransactionLogProps> = ({ transactions }) => {
         })
       );
       setCards(cardList);
+      cardList.forEach((card) => fetchTransactionsForCard(card.cardNumber));
     }
-  };
-  const navigate = useNavigate();
-  const handleSignOut = async () => {
-    try {
-      await signOut(auth);
-      navigate("/");
-      console.log("User signed out successfully");
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
+    setLastRefreshed(new Date());
   };
 
   useEffect(() => {
     fetchCards();
+
+    // Refresh data every 30 seconds
+    const intervalId = setInterval(fetchCards, 10000);
+
+    // Cleanup the interval on component unmount
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleOpenCardForm = () => {
@@ -67,6 +98,16 @@ const Dashboard: React.FC<TransactionLogProps> = ({ transactions }) => {
   const handleCloseCardForm = () => {
     setIsCardFormOpen(false);
     fetchCards(); // Refetch the cards after closing the modal to ensure updated data
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      navigate("/");
+      console.log("User signed out successfully");
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   const handleRemoveCard = async (id: string) => {
@@ -86,8 +127,11 @@ const Dashboard: React.FC<TransactionLogProps> = ({ transactions }) => {
   return (
     <Paper elevation={3} style={{ margin: "20px", padding: "20px" }}>
       <Typography variant="h5">Transaction Log</Typography>
+      <Typography variant="subtitle2">
+        Last refreshed: {lastRefreshed?.toLocaleTimeString()}
+      </Typography>
       <List>
-        {transactions.map((transaction) => (
+        {allTransactions.map((transaction) => (
           <ListItem key={transaction.timestamp}>
             <ListItemText
               primary={`${transaction.timestamp}`}
@@ -113,7 +157,7 @@ const Dashboard: React.FC<TransactionLogProps> = ({ transactions }) => {
         Add Card
       </Button>
       <Button variant="contained" color="secondary" onClick={handleSignOut}>
-        Sign Out 
+        Sign Out
       </Button>
       <Modal
         open={isCardFormOpen}
