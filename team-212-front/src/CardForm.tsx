@@ -2,6 +2,7 @@ import React, {} from "react";
 import {
   Box,
   Grid,
+  TextField,
 } from "@mui/material";
 import Sidebar from "./Sidebar";
 import AddCard from "./AddCard";
@@ -42,6 +43,17 @@ const CardForm: React.FC<CardFormProps> = ({ onCardAdded }) => {
             alignItems="center"
             bgcolor="#fcfbfa"
           >
+            <form onSubmit={ undefined}>
+                  <TextField
+                    variant="outlined"
+                    margin="normal"
+                    required
+                    fullWidth
+                    label="Phone Number"
+                    value={undefined}
+                    onChange={() => undefined}
+                  />
+                </form>
             <AddCard onCardAdded={onCardAdded}></AddCard>
           </Box>
         </Grid>

@@ -7,7 +7,7 @@ import {
   Container,
   Divider,
   Box,
-  Grid
+  Grid,
 } from "@mui/material";
 import {
   createUserWithEmailAndPassword,
@@ -20,6 +20,7 @@ import Sidebar from "./Sidebar";
 const LoginSignup: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [phone, setPhone] = useState<string>("");
   const [isLoginMode, setIsLoginMode] = useState<boolean>(true);
   const navigate = useNavigate();
 
@@ -28,12 +29,11 @@ const LoginSignup: React.FC = () => {
     try {
       if (isLoginMode) {
         await signInWithEmailAndPassword(auth, email, password);
-        console.log("Logged in successfully");
+        navigate("/");
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
-        console.log("Signed up successfully");
+        navigate("/");
       }
-      navigate("/");
     } catch (error: unknown) {
       console.error(
         "Unknown error occurred with Firebase authentication: ",
@@ -92,6 +92,20 @@ const LoginSignup: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
+                  {isLoginMode ? (
+                    <></>
+                  ) : (
+                    <TextField
+                      variant="outlined"
+                      margin="normal"
+                      required
+                      fullWidth
+                      label="Phone Number"
+                      type="phone"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                    />
+                  )}
                   <TextField
                     variant="outlined"
                     margin="normal"

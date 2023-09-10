@@ -6,7 +6,6 @@ import {
   Navigate,
 } from "react-router-dom";
 import Dashboard from "./Dashboard";
-import CardForm from "./CardForm";
 import { User, getAuth, onAuthStateChanged } from "firebase/auth";
 import { getDatabase, ref, get } from "firebase/database";
 import LoginSignup from "./LoginSignup";
@@ -19,9 +18,6 @@ const App: React.FC = () => {
 
   const auth = getAuth();
   const db = getDatabase();
-  const handleCardAdded = () => {
-    setCardNumberRefExists(true);
-  };
   useEffect(() => {
     // Subscribe to authentication state changes
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -61,10 +57,6 @@ const App: React.FC = () => {
           path="/dashboard"
           element={<Dashboard transactions={[{ timestamp: "21" }]} />}
         />
-        <Route
-          path="/cardform"
-          element={<CardForm onCardAdded={handleCardAdded} />}
-        />
       </Routes>
     </Router>
   );
@@ -73,11 +65,9 @@ const App: React.FC = () => {
 const NavigateBasedOnAuth: React.FC<{
   user: User | null;
   cardNumberRefExists: boolean | null;
-}> = ({ user, cardNumberRefExists }) => {
+}> = ({ user }) => {
   if (!user) return <Navigate to="/login" replace />;
-  if (cardNumberRefExists) return <Navigate to="/dashboard" replace />;
-  if (cardNumberRefExists === false) return <Navigate to="/cardform" replace />;
-  return <div>Loading...</div>;
+  else return <Navigate to="/dashboard" replace />;
 };
 
 export default App;

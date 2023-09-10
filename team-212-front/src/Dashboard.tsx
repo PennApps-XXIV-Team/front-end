@@ -56,7 +56,6 @@ const Dashboard: React.FC<TransactionLogProps> = ({ transactions }) => {
     }
   };
 
-
   useEffect(() => {
     fetchCards();
   }, []);
